@@ -9,8 +9,8 @@
 
     function onReady(smart)  {
       // TODO: fhir-client v2 has different APIs!
-      console.log('Practitioner resource identity: ' + client.userId)
-      console.log('Patient resource identity: ' + client.server.serviceUrl + '/Patient/' + client.patient.id)
+      console.log('Practitioner resource identity: ' + smart.userId)
+      console.log('Patient resource identity: ' + smart.server.serviceUrl + '/Patient/' + smart.patient.id)
 
       if (smart.hasOwnProperty('patient')) {
         var pt = smart.patient.read();
