@@ -8,12 +8,9 @@
     }
 
     function onReady(smart)  {
-      console.log('Smart client:')
-      console.log(smart.getState())
-      console.log('Practitioner:')
-      console.log(client.user.resourceType)
-      console.log(client.user.id)
-      console.log(client.user.fhirUser)
+      // TODO: fhir-client v2 has different APIs!
+      console.log('Practitioner resource identity: ' + client.userId)
+      console.log('Patient resource identity: ' + client.server.serviceUrl + '/Patient/' + client.patient.id)
 
       if (smart.hasOwnProperty('patient')) {
         var pt = smart.patient.read();
@@ -31,7 +28,6 @@
         $.when(pt, obv).fail(onError);
 
         $.when(pt, obv).done(function(patient, obv) {
-          console.log('Patient:')
           console.log(patient)
           var byCodes = smart.byCodes(obv, 'code');
           var gender = patient.gender;
