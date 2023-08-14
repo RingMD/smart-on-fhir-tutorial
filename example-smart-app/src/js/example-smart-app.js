@@ -8,9 +8,15 @@
     }
 
     function onReady(smart)  {
+      console.log('Smart client:')
+      console.log(smart.getState())
+      console.log('Practitioner:')
+      console.log(client.user.resourceType)
+      console.log(client.user.id)
+      console.log(client.user.fhirUser)
+
       if (smart.hasOwnProperty('patient')) {
-        var patient = smart.patient;
-        var pt = patient.read();
+        var pt = smart.patient.read();
         var obv = smart.patient.api.fetchAll({
                     type: 'Observation',
                     query: {
@@ -25,6 +31,8 @@
         $.when(pt, obv).fail(onError);
 
         $.when(pt, obv).done(function(patient, obv) {
+          console.log('Patient:')
+          console.log(patient)
           var byCodes = smart.byCodes(obv, 'code');
           var gender = patient.gender;
 
