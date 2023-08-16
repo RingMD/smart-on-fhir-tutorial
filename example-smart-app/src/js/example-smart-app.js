@@ -7,10 +7,19 @@
       ret.reject();
     }
 
+    async function readSlots (client) {
+      const now = (new Date()).toISOString()
+      const slots = await client.request(`Slot/?_id=${client.userId}&start=ge${now}`)
+
+      console.log(slots)
+    }
+
     function onReady(client)  {
       // TODO: fhir-client v2 has different APIs!
       console.log('Practitioner resource identity: ' + client.userId)
       console.log('Patient resource identity: ' + client.server.serviceUrl + '/Patient/' + client.patient.id)
+
+      readSlots(client)
 
       if (client.hasOwnProperty('patient')) {
         var pt = client.patient.read();
