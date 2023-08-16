@@ -9,15 +9,14 @@
 
     async function readSlots (client) {
       const now = (new Date()).toISOString()
-      const slots = await client.request(`Slot/?_id=${client.userId}&start=ge${now}`)
+      const slots = await client.request(`Slot/?_id=${client.user.id}&start=ge${now}`)
 
       console.log(slots)
     }
 
     function onReady(client)  {
-      // TODO: fhir-client v2 has different APIs!
-      console.log('Practitioner resource identity: ' + client.userId)
-      console.log('Patient resource identity: ' + client.server.serviceUrl + '/Patient/' + client.patient.id)
+      console.log('Practitioner resource identity: ' + client.user.id)
+      console.log('Patient resource identity: ' + client.getState('serverUrl') + '/Patient/' + client.patient.id)
 
       readSlots(client)
 
@@ -85,7 +84,7 @@
       }
     }
 
-    FHIR.oauth2.ready(onReady, onError);
+    FHIR.oauth2.ready().then(onReady).catch(onError);
     return ret.promise();
 
   };
