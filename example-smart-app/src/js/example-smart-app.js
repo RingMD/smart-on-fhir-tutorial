@@ -13,7 +13,7 @@
       later.setDate(now.getDate() + 30)
       const min = now.toISOString()
       const max = later.toISOString()
-      const slots = await client.request(`Slot/?schedule.actor=${client.user.fhirUser}&start=ge${min}&start=lt${max}`)
+      const slots = await client.request(`Slot/?schedule.actor=${client.user.fhirUser}&service-type=https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/14249|4047611&start=ge${min}&start=lt${max}`)
 
       console.log(slots)
     }
