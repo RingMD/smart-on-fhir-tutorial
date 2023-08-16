@@ -27,16 +27,16 @@
     <script src='./lib/js/fhir-client-cerner-additions-1.0.0.js'></script>
     <script>
       (function () {
+        // https://build.fhir.org/ig/HL7/smart-app-launch/scopes-and-launch-context.html
         const scopes = [
-          'patient/Patient.read',
-          'patient/Observation.read',
+          'patient/Patient.rs',
+          'patient/Observation.rs',
           'launch',
           'online_access',
           'openid',
           'profile',
-          'Appointment.read',
-          'Appointment.write',
-          'Slot.read'
+          'user/Appointment.cruds',
+          'user/Slot.rs'
         ]
 
         FHIR.oauth2.authorize({
