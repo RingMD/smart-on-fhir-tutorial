@@ -13,13 +13,13 @@
       later.setDate(now.getDate() + 30)
       const min = now.toISOString()
       const max = later.toISOString()
-      const slots = await client.request(`Slot/?_id=${client.user.id}&start=ge${min}&start=lt${max}`)
+      const slots = await client.request(`Slot/?_id=${client.user.fhirUser}&start=ge${min}&start=lt${max}`)
 
       console.log(slots)
     }
 
     function onReady(client)  {
-      console.log('Practitioner resource identity: ' + client.user.id)
+      console.log('Practitioner resource identity: ' + client.user.fhirUser)
       console.log('Patient resource identity: ' + client.getState('serverUrl') + '/Patient/' + client.patient.id)
 
       readSlots(client)
