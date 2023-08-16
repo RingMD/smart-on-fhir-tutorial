@@ -8,8 +8,11 @@
     }
 
     async function readSlots (client) {
-      const now = (new Date()).toISOString()
-      const slots = await client.request(`Slot/?_id=${client.user.id}&start=ge${now}`)
+      const now = new Date()
+      const later = (new Date()).setDate(now.getDate() + 30)
+      const min = now.toISOString()
+      const max = later.toISOString()
+      const slots = await client.request(`Slot/?_id=${client.user.id}&start=ge${min}&start=lt${max}`)
 
       console.log(slots)
     }
