@@ -26,10 +26,24 @@
     <!-- https://github.com/cerner/fhir-client-cerner-additions -->
     <script src='./lib/js/fhir-client-cerner-additions-1.0.0.js'></script>
     <script>
-      FHIR.oauth2.authorize({
-        'client_id': '5fc59dd3-4707-4d46-bb7f-f1abf96a0605',
-        'scope':  'patient/Patient.read patient/Observation.read launch online_access openid profile'
-      });
+      (function () {
+        const scopes = [
+          'patient/Patient.read',
+          'patient/Observation.read',
+          'launch',
+          'online_access',
+          'openid',
+          'profile',
+          'Appointment.read',
+          'Appointment.write',
+          'Slot.read'
+        ]
+
+        FHIR.oauth2.authorize({
+          'client_id': '5fc59dd3-4707-4d46-bb7f-f1abf96a0605',
+          'scope': scopes.join(' ')
+        })
+      })();
     </script>
     <div class="spinner">
       <div class="bounce1"></div>
