@@ -7,14 +7,14 @@
       ret.reject();
     }
 
-    function onReady(smart)  {
+    function onReady(client)  {
       // TODO: fhir-client v2 has different APIs!
-      console.log('Practitioner resource identity: ' + smart.userId)
-      console.log('Patient resource identity: ' + smart.server.serviceUrl + '/Patient/' + smart.patient.id)
+      console.log('Practitioner resource identity: ' + client.userId)
+      console.log('Patient resource identity: ' + client.server.serviceUrl + '/Patient/' + client.patient.id)
 
-      if (smart.hasOwnProperty('patient')) {
-        var pt = smart.patient.read();
-        var obv = smart.patient.api.fetchAll({
+      if (client.hasOwnProperty('patient')) {
+        var pt = client.patient.read();
+        var obv = client.patient.api.fetchAll({
                     type: 'Observation',
                     query: {
                       code: {
@@ -29,7 +29,7 @@
 
         $.when(pt, obv).done(function(patient, obv) {
           console.log(patient)
-          var byCodes = smart.byCodes(obv, 'code');
+          var byCodes = client.byCodes(obv, 'code');
           var gender = patient.gender;
 
           var fname = '';
