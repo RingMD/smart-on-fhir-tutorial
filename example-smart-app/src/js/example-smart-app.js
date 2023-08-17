@@ -32,7 +32,7 @@
         { key: 'schedule.actor', value: client.user.fhirUser },
         { key: 'service-type', value: serviceType },
         { key: 'start', value: `ge${min}` },
-        { key: 'start', value: `lt${max} }`
+        { key: 'start', value: `lt${max}` }
       ])
       const slots = await client.request(`Slot/?${query}`)
 
