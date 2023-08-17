@@ -1,10 +1,10 @@
 (function(window){
   window.extractData = function() {
-    var ret = $.Deferred();
+    var deferred = $.Deferred();
 
     function onError() {
       console.log('Loading error', arguments);
-      ret.reject();
+      deferred.reject();
     }
 
     // http://docs.smarthealthit.org/client-js/fhirjs-equivalents
@@ -39,35 +39,36 @@
       console.log(slots)
     }
 
-    function onReady(client)  {
+    async function onReady(client)  {
       console.log('Practitioner resource identity: ' + client.user.fhirUser)
       console.log('Patient resource identity: ' + client.getState('serverUrl') + '/Patient/' + client.patient.id)
 
       readSlots(client)
 
       if (client.hasOwnProperty('patient')) {
-        var pt = client.patient.read();
-        const obvQuery = getQuery([
-          { key: 'patient', value: client.patient.id },
-          { key: 'code', value: [
-                                  'http://loinc.org|8302-2',
-                                  'http://loinc.org|8462-4',
-                                  'http://loinc.org|8480-6',
-                                  'http://loinc.org|2085-9',
-                                  'http://loinc.org|2089-1',
-                                  'http://loinc.org|55284-4'
-                                ].join(',') }
-        ])
-        var obv = client.request(`Observation?${obvQuery}`, {
-          pageLimit: 0,
-          flat: true
-        });
+        try {
+          const observationQuery = getQuery([
+            { key: 'patient', value: client.patient.id },
+            { key: 'code', value: [
+                                    'http://loinc.org|8302-2',
+                                    'http://loinc.org|8462-4',
+                                    'http://loinc.org|8480-6',
+                                    'http://loinc.org|2085-9',
+                                    'http://loinc.org|2089-1',
+                                    'http://loinc.org|55284-4'
+                                  ].join(',') }
+          ])
+          const [patient, observations] = await Promise.all([
+            client.patient.read(),
+            client.request(`Observation?${observationQuery}`, {
+              pageLimit: 0,
+              flat: true
+            })
+          ])
 
-        $.when(pt, obv).fail(onError);
-
-        $.when(pt, obv).done(function(patient, obv) {
           console.log(patient)
-          var byCodes = client.byCodes(obv, 'code');
+
+          var byCodes = client.byCodes(observations, 'code');
           var gender = patient.gender;
 
           var fname = '';
@@ -107,15 +108,17 @@
           p.hdl = getQuantityValueAndUnit(hdl[0]);
           p.ldl = getQuantityValueAndUnit(ldl[0]);
 
-          ret.resolve(p);
-        });
+          deferred.resolve(p)
+        } catch (error) {
+          onError(error)
+        }
       } else {
         onError();
       }
     }
 
     FHIR.oauth2.ready().then(onReady).catch(onError);
-    return ret.promise();
+    return deferred.promise();
 
   };
 
