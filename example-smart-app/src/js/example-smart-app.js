@@ -7,6 +7,12 @@
       ret.reject();
     }
 
+    async function readSchedules (client) {
+      const schedules = await client.request(`Schedule/?_id=${client.user.id}`)
+
+      console.log(schedules)
+    }
+
     async function readSlots (client) {
       const now = new Date()
       const later = new Date()
@@ -22,7 +28,8 @@
       console.log('Practitioner resource identity: ' + client.user.fhirUser)
       console.log('Patient resource identity: ' + client.getState('serverUrl') + '/Patient/' + client.patient.id)
 
-      readSlots(client)
+      readSchedules(client)
+      // readSlots(client)
 
       if (client.hasOwnProperty('patient')) {
         var pt = client.patient.read();
