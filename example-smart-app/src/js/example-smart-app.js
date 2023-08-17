@@ -12,7 +12,7 @@
       const query = new URLSearchParams()
 
       params.forEach(param => {
-        query.set(param.key, param.value)
+        query.append(param.key, param.value)
       })
 
       return query
