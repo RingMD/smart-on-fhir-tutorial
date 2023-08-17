@@ -12,23 +12,18 @@
     -->
   </head>
   <body>
-    <div id='errors'>
-    </div>
-    <div id="loading" class="spinner">
-      <div class="bounce1"></div>
-      <div class="bounce2"></div>
-      <div class="bounce3"></div>
-    </div>
     <div id='app' >
       <h2>RingMD Example-SMART-App</h2>
 
-      <template v-if='isLoading'>
-        Loading...
-      </template>
-      <template v-else-if='error'>
-        <div style='color: red;'>{{ error }}</div>
-      </template>
-      <template v-else>
+      <div v-if='isLoading' class='spinner'>
+        <div class='bounce1'></div>
+        <div class='bounce2'></div>
+        <div class='bounce3'></div>
+      </div>
+      <div v-else-if='error' style='color: red;'>
+        {{ error }}
+      </div>
+      <div v-else>
         <h2>Patient Resource</h2>
         <table>
           <tr>
@@ -71,7 +66,7 @@
             <td>{{ display.hdl }}</td>
           </tr>
         </table>
-      </template>
+      </div>
     </div>
     <!-- Required JS files to enable this page to embed within an MPage -->
     <!--
