@@ -1,9 +1,9 @@
 (function (window) {
 
-  const { createApp, reactive, ref } = Vue
+  const { createApp, ref } = Vue
 
   function setup () {
-    const display = reactive({})
+    const display = ref({})
     const error = ref(null)
     const isLoading = ref(true)
 
