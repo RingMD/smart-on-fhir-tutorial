@@ -1,6 +1,6 @@
-(function (window) {
+(async function (window) {
 
-  import { createApp, reactive, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js'
+  const { createApp, reactive, ref } = await import('https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js')
 
   async function setup () {
     const display = reactive({})
