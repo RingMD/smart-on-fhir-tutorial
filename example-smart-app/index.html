@@ -75,6 +75,11 @@
       <script src='./lib/js/cerner-smart-embeddable-lib-1.0.0.min.js'></script>
     -->
 
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+    <!-- Application-level javascript-->
+    <script src='./src/js/example-smart-app.js'></script>
+
     <!-- FHIR Client JS Library -->
     <script src='https://cdn.jsdelivr.net/npm/fhirclient@latest/build/fhir-client.min.js'></script>
 
@@ -82,6 +87,8 @@
     <!-- https://github.com/cerner/fhir-client-cerner-additions -->
     <script src='./lib/js/fhir-client-cerner-additions-1.0.0.js'></script>
 
-    <script type='module' src='./src/js/example-smart-app.js'></script>
+    <script>
+      window.rmd.init()
+    </script>
   </body>
 </html>

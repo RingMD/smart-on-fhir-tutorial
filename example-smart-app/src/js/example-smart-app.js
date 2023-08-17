@@ -1,44 +1,47 @@
-(async function (window) {
+(function (window) {
 
-  const { createApp, reactive, ref } = await import('https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js')
+  const { createApp, reactive, ref } = Vue
 
-  async function setup () {
+  function setup () {
     const display = reactive({})
     const error = ref(null)
     const isLoading = ref(true)
 
-    try {
-      const client = await FHIR.oauth2.ready()
+    FHIR.oauth2.ready().then(async client => {
+      try {
+        console.log('Practitioner resource identity: ' + client.user.fhirUser)
+        console.log('Patient resource identity: ' + client.getState('serverUrl') + '/Patient/' + client.patient.id)
 
-      console.log('Practitioner resource identity: ' + client.user.fhirUser)
-      console.log('Patient resource identity: ' + client.getState('serverUrl') + '/Patient/' + client.patient.id)
+        const observationQuery = getQuery([
+          { key: 'patient', value: client.patient.id },
+          { key: 'code', value: [
+                                  'http://loinc.org|8302-2',
+                                  'http://loinc.org|8462-4',
+                                  'http://loinc.org|8480-6',
+                                  'http://loinc.org|2085-9',
+                                  'http://loinc.org|2089-1',
+                                  'http://loinc.org|55284-4'
+                                ].join(',') }
+        ])
+        const [patient, observations, slots] = await Promise.all([
+          client.patient.read(),
+          client.request(`Observation?${observationQuery}`, {
+            pageLimit: 0,
+            flat: true
+          }),
+          readSlots(client)
+        ])
 
-      const observationQuery = getQuery([
-        { key: 'patient', value: client.patient.id },
-        { key: 'code', value: [
-                                'http://loinc.org|8302-2',
-                                'http://loinc.org|8462-4',
-                                'http://loinc.org|8480-6',
-                                'http://loinc.org|2085-9',
-                                'http://loinc.org|2089-1',
-                                'http://loinc.org|55284-4'
-                              ].join(',') }
-      ])
-      const [patient, observations, slots] = await Promise.all([
-        client.patient.read(),
-        client.request(`Observation?${observationQuery}`, {
-          pageLimit: 0,
-          flat: true
-        }),
-        readSlots(client)
-      ])
-
-      display.value = displayPatient(client, patient, observations)
-    } catch (ex) {
-      error.value = ex
-    } finally {
+        display.value = displayPatient(client, patient, observations)
+      } catch (ex) {
+        error.value = ex
+      } finally {
+        isLoading.value = false
+      }
+    }).catch(ex => {
       isLoading.value = false
-    }
+      error.value = ex
+    })
 
     return {
       display,
@@ -137,6 +140,10 @@
     }
   }
 
-  createApp({ setup }).mount('#app')
+  window.rmd = {
+    init () {
+      createApp({ setup }).mount('#app')
+    }
+  }
 
 })(window);
