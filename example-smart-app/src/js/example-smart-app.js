@@ -7,19 +7,17 @@
       ret.reject();
     }
 
-    async function readSchedules (client) {
-      const schedules = await client.request(`Schedule/?_id=${client.user.id}`)
-
-      console.log(schedules)
-    }
-
     async function readSlots (client) {
       const now = new Date()
       const later = new Date()
       later.setDate(now.getDate() + 30)
       const min = now.toISOString()
       const max = later.toISOString()
-      const slots = await client.request(`Slot/?schedule.actor=${client.user.fhirUser}&service-type=https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/14249|4047611&start=ge${min}&start=lt${max}`)
+      // get from the sandbox test data
+      // https://docs.google.com/document/d/10RnVyF1etl_17pyCyK96tyhUWRbrTyEcqpwzW-Z-Ybs/edit#heading=h.78lvm8ihmcyu
+      // for production, service types must be provided by the implementation team
+      const serviceType = 'https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/14249|2572307911'
+      const slots = await client.request(`Slot/?schedule.actor=${client.user.fhirUser}&service-type=${serviceType}&start=ge${min}&start=lt${max}`)
 
       console.log(slots)
     }
@@ -28,8 +26,7 @@
       console.log('Practitioner resource identity: ' + client.user.fhirUser)
       console.log('Patient resource identity: ' + client.getState('serverUrl') + '/Patient/' + client.patient.id)
 
-      readSchedules(client)
-      // readSlots(client)
+      readSlots(client)
 
       if (client.hasOwnProperty('patient')) {
         var pt = client.patient.read();
