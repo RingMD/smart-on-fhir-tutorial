@@ -19,52 +19,59 @@
       <div class="bounce2"></div>
       <div class="bounce3"></div>
     </div>
-    <div id='holder' >
+    <div id='app' >
       <h2>RingMD Example-SMART-App</h2>
 
-      <h2>Patient Resource</h2>
-      <table>
-        <tr>
-          <th>First Name:</th>
-          <td id='fname'></td>
-        </tr>
-        <tr>
-          <th>Last Name:</th>
-          <td id='lname'></td>
-        </tr>
-        <tr>
-          <th>Gender:</th>
-          <td id='gender'></td>
-        </tr>
-        <tr>
-          <th>Date of Birth:</th>
-          <td id='birthdate'></td>
-        </tr>
-      </table>
-      <h2>Observation Resource</h2>
-      <table>
-        <tr>
-          <th>Height:</th>
-          <td id='height'></td>
-        </tr>
-        <tr>
-          <th>Systolic Blood Pressure:</th>
-          <td id='systolicbp'></td>
-
-        </tr>
-        <tr>
-          <th>Diastolic Blood Pressure:</th>
-          <td id='diastolicbp'></td>
-        </tr>
-        <tr>
-          <th>LDL:</th>
-          <td id='ldl'></td>
-        </tr>
-        <tr>
-          <th>HDL:</th>
-          <td id='hdl'></td>
-        </tr>
-      </table>
+      <template v-if='isLoading'>
+        Loading...
+      </template>
+      <template v-else-if='error'>
+        <div style='color: red;'>{{ error }}</div>
+      </template>
+      <template v-else>
+        <h2>Patient Resource</h2>
+        <table>
+          <tr>
+            <th>First Name:</th>
+            <td>{{ display.firstName }}</td>
+          </tr>
+          <tr>
+            <th>Last Name:</th>
+            <td>{{ display.lastName }}</td>
+          </tr>
+          <tr>
+            <th>Gender:</th>
+            <td>{{ display.gender }}</td>
+          </tr>
+          <tr>
+            <th>Date of Birth:</th>
+            <td>{{ display.birthDate }}</td>
+          </tr>
+        </table>
+        <h2>Observation Resource</h2>
+        <table>
+          <tr>
+            <th>Height:</th>
+            <td>{{ display.height }}</td>
+          </tr>
+          <tr>
+            <th>Systolic Blood Pressure:</th>
+            <td>{{ display.systolicbp }}</td>
+          </tr>
+          <tr>
+            <th>Diastolic Blood Pressure:</th>
+            <td>{{ display.diastolicbp }}</td>
+          </tr>
+          <tr>
+            <th>LDL:</th>
+            <td>{{ display.ldl }}</td>
+          </tr>
+          <tr>
+            <th>HDL:</th>
+            <td>{{ display.hdl }}</td>
+          </tr>
+        </table>
+      </template>
     </div>
     <!-- Required JS files to enable this page to embed within an MPage -->
     <!--
@@ -72,6 +79,8 @@
       <script src='https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.26.0/polyfill.min.js'></script>
       <script src='./lib/js/cerner-smart-embeddable-lib-1.0.0.min.js'></script>
     -->
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 
     <!-- Application-level javascript-->
     <script src='./src/js/example-smart-app.js'></script>
@@ -82,20 +91,9 @@
     <!-- Prevent session bleed caused by single threaded embedded browser and sessionStorage API -->
     <!-- https://github.com/cerner/fhir-client-cerner-additions -->
     <script src='./lib/js/fhir-client-cerner-additions-1.0.0.js'></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script>
-      extractData().then(
-        //Display Patient Demographics and Observations if extractData was success
-        function(p) {
-          drawVisualization(p);
-        },
 
-        //Display 'Failed to call FHIR Service' if extractData failed
-        function() {
-          $('#loading').hide();
-          $('#errors').html('<p> Failed to call FHIR Service </p>');
-        }
-      );
+    <script>
+      window.rmd.init()
     </script>
   </body>
 </html>
