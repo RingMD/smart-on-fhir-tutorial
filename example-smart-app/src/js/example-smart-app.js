@@ -1,6 +1,6 @@
 (function (window) {
 
-  const { createApp, reactive, ref } = Vue
+  import { createApp, reactive, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js'
 
   async function setup () {
     const display = reactive({})
@@ -137,10 +137,6 @@
     }
   }
 
-  window.rmd = {
-    init () {
-      createApp({ setup }).mount('#app')
-    }
-  }
+  createApp({ setup }).mount('#app')
 
 })(window);
