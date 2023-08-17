@@ -7,17 +7,34 @@
       ret.reject();
     }
 
+    // http://docs.smarthealthit.org/client-js/fhirjs-equivalents
+    function getQuery (params) {
+      const query = new URLSearchParams()
+
+      params.forEach(param => {
+        query.set(param.key, param.value)
+      })
+
+      return query
+    }
+
     async function readSlots (client) {
       const now = new Date()
       const later = new Date()
       later.setDate(now.getDate() + 30)
       const min = now.toISOString()
       const max = later.toISOString()
-      // get from the sandbox test data
+      // get from the sandbox test data - "Video Visit"
       // https://docs.google.com/document/d/10RnVyF1etl_17pyCyK96tyhUWRbrTyEcqpwzW-Z-Ybs/edit#heading=h.78lvm8ihmcyu
       // for production, service types must be provided by the implementation team
       const serviceType = 'https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/14249|2572307911'
-      const slots = await client.request(`Slot/?schedule.actor=${client.user.fhirUser}&service-type=${serviceType}&start=ge${min}&start=lt${max}`)
+      const query = getQuery([
+        { key: 'schedule.actor', value: client.user.fhirUser },
+        { key: 'service-type', value: serviceType },
+        { key: 'start', value: `ge${min}` },
+        { key: 'start', value: `lt${max} }`
+      ])
+      const slots = await client.request(`Slot/?${query}`)
 
       console.log(slots)
     }
@@ -30,16 +47,21 @@
 
       if (client.hasOwnProperty('patient')) {
         var pt = client.patient.read();
-        var obv = client.patient.api.fetchAll({
-                    type: 'Observation',
-                    query: {
-                      code: {
-                        $or: ['http://loinc.org|8302-2', 'http://loinc.org|8462-4',
-                              'http://loinc.org|8480-6', 'http://loinc.org|2085-9',
-                              'http://loinc.org|2089-1', 'http://loinc.org|55284-4']
-                      }
-                    }
-                  });
+        const obvQuery = getQuery([
+          { key: 'patient', value: client.patient.id },
+          { key: 'code', value: [
+                                  'http://loinc.org|8302-2',
+                                  'http://loinc.org|8462-4',
+                                  'http://loinc.org|8480-6',
+                                  'http://loinc.org|2085-9',
+                                  'http://loinc.org|2089-1',
+                                  'http://loinc.org|55284-4'
+                                ].join(',') }
+        ])
+        var obv = client.request(`Observation?${obvQuery}`, {
+          pageLimit: 0,
+          flat: true
+        });
 
         $.when(pt, obv).fail(onError);
 
