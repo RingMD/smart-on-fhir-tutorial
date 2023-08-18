@@ -56,27 +56,35 @@
         return window.alert('Slot is required!')
       }
 
-      const result = await client.request({
-        url: 'Appointment',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/fhir+json'
-        },
-        body: JSON.stringify({
-          resourceType: 'Appointment',
-          status: 'booked',
-          slot: [{ reference: `Slot/${resource.id}` }],
-          participant: [{
-            actor: {
-              reference: `Patient/${client.patient.id}`,
-              display: `${display.value.firstName} ${display.value.lastName}`
-            },
-            status: 'accepted'
-          }]
-        })
-      })
+      try {
+        isLoading.value = true
 
-      console.log(result)
+        const result = await client.request({
+          url: 'Appointment',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/fhir+json'
+          },
+          body: JSON.stringify({
+            resourceType: 'Appointment',
+            status: 'booked',
+            slot: [{ reference: `Slot/${resource.id}` }],
+            participant: [{
+              actor: {
+                reference: `Patient/${client.patient.id}`,
+                display: `${display.value.firstName} ${display.value.lastName}`
+              },
+              status: 'accepted'
+            }]
+          })
+        })
+
+        console.log(result)
+      } catch (ex) {
+        error.value = ex
+      } finally {
+        isLoading.value = false
+      }
     }
 
     return {
