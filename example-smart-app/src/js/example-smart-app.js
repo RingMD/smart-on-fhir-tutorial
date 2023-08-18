@@ -40,8 +40,8 @@
         ])
 
         display.value = displayPatient(client, results[0], results[1])
-        slots.value = results[2]
-        appointments.value = results[3]
+        appointments.value = results[2]
+        slots.value = results[3]
       } catch (ex) {
         error.value = ex
       } finally {
