@@ -66,6 +66,17 @@
             <td>{{ display.hdl }}</td>
           </tr>
         </table>
+        <h2>Schedule Video Visit</h2>
+        <form @submit.prevent='scheduleVideoVisit()'>
+          <label>
+            Slot
+            <select v-model='selectedSlot'>
+              <option :value='null'>-- Select --</option>
+              <option v-for='slot in slots' :value='slot.value'>{{ slot.label }}</option>
+            </select>
+          </label>
+          <button type='submit'>Submit</button>
+        </form>
       </div>
     </div>
     <!-- Required JS files to enable this page to embed within an MPage -->

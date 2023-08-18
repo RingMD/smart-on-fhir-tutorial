@@ -6,6 +6,8 @@
     const display = ref({})
     const error = ref(null)
     const isLoading = ref(true)
+    const selectedSlot = ref(null)
+    const slots = ref([])
 
     FHIR.oauth2.ready().then(async client => {
       try {
@@ -23,7 +25,7 @@
                                   'http://loinc.org|55284-4'
                                 ].join(',') }
         ])
-        const [patient, observations, slots] = await Promise.all([
+        const [patient, observations, slotOpts] = await Promise.all([
           client.patient.read(),
           client.request(`Observation?${observationQuery}`, {
             pageLimit: 0,
@@ -33,6 +35,7 @@
         ])
 
         display.value = displayPatient(client, patient, observations)
+        slots.value = slotOpts
       } catch (ex) {
         error.value = ex
       } finally {
@@ -43,10 +46,39 @@
       error.value = ex
     })
 
+    async function scheduleVideoVisit () {
+      const resource = selectedSlot.value
+
+      if (!resource) {
+        return window.alert('Slot is required!')
+      }
+
+      const result = await client.request({
+        url: 'Appointment',
+        method: 'POST',
+        body: {
+          status: 'booked',
+          slot: [{ reference: `Slot/${resource.id}` }],
+          participant: [{
+            actor: {
+              reference: `Patient/${client.patient.id}`,
+              display: `${display.value.firstName} ${display.value.lastName}`
+            },
+            status: 'accepted'
+          }]
+        }
+      })
+
+      console.log(result)
+    }
+
     return {
       display,
       error,
-      isLoading
+      isLoading,
+      scheduleVideoVisit,
+      selectedSlot,
+      slots
     }
   }
 
@@ -77,9 +109,18 @@
       { key: 'start', value: `ge${min}` },
       { key: 'start', value: `lt${max}` }
     ])
-    const slots = await client.request(`Slot/?${query}`)
+    const results = await client.request(`Slot/?${query}`)
 
-    console.log(slots)
+    return results.entry.map(result => {
+      const { resource } = result
+      const start = (new Date(resource.start)).toLocaleString()
+      const end = (new Date(resource.end)).toLocaleString()
+
+      return {
+        label: `${start} - ${end}`,
+        value: resource
+      }
+    })
   }
 
   function displayPatient (client, patient, observations) {
