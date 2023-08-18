@@ -9,6 +9,7 @@
     const isLoading = ref(true)
     const selectedSlot = ref(null)
     const slots = ref([])
+    const appointments = ref([])
 
     FHIR.oauth2.ready().then(async smartClient => {
       client = smartClient
@@ -28,17 +29,19 @@
                                   'http://loinc.org|55284-4'
                                 ].join(',') }
         ])
-        const [patient, observations, slotOpts] = await Promise.all([
+        const results = await Promise.all([
           client.patient.read(),
           client.request(`Observation?${observationQuery}`, {
             pageLimit: 0,
             flat: true
           }),
+          readAppointments(client),
           readSlots(client)
         ])
 
-        display.value = displayPatient(client, patient, observations)
-        slots.value = slotOpts
+        display.value = displayPatient(client, results[0], results[1])
+        slots.value = results[2]
+        appointments.value = results[3]
       } catch (ex) {
         error.value = ex
       } finally {
@@ -49,17 +52,21 @@
       error.value = ex
     })
 
-    async function scheduleVideoVisit () {
-      const resource = selectedSlot.value
+    async function refreshAppointments () {
+      appointments.value = await readAppointments(client)
+    }
 
-      if (!resource) {
+    async function scheduleVideoVisit () {
+      const slot = selectedSlot.value
+
+      if (!slot) {
         return window.alert('Slot is required!')
       }
 
       try {
         isLoading.value = true
 
-        const result = await client.request({
+        await client.request({
           url: 'Appointment',
           method: 'POST',
           headers: {
@@ -68,7 +75,7 @@
           body: JSON.stringify({
             resourceType: 'Appointment',
             status: 'booked',
-            slot: [{ reference: `Slot/${resource.id}` }],
+            slot: [{ reference: `Slot/${slot.id}` }],
             participant: [{
               actor: {
                 reference: `Patient/${client.patient.id}`,
@@ -79,7 +86,42 @@
           })
         })
 
-        console.log(result)
+        await refreshAppointments()
+      } catch (ex) {
+        error.value = ex
+      } finally {
+        isLoading.value = false
+      }
+    }
+
+    async function cancelAppointment (appointment) {
+      try {
+        isLoading.value = true
+
+        await client.request({
+          url: `Appointment/${appointment.id}`,
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/fhir+json'
+          },
+          body: JSON.stringify([
+            { op: 'replace', path: '/status', value: 'cancelled' },
+            {
+              op: 'add',
+              path: '/cancelationReason',
+              value: {
+                coding: [
+                  {
+                    system: 'http://terminology.hl7.org/CodeSystem/appointment-cancellation-reason',
+                    code: 'oth-err'
+                  }
+                ]
+              }
+            }
+          ])
+        })
+
+        await refreshAppointments()
       } catch (ex) {
         error.value = ex
       } finally {
@@ -93,7 +135,9 @@
       isLoading,
       scheduleVideoVisit,
       selectedSlot,
-      slots
+      slots,
+      appointments,
+      cancelAppointment
     }
   }
 
@@ -106,6 +150,18 @@
     })
 
     return query
+  }
+
+  async function readAppointments (client) {
+    const now = new Date()
+    const query = getQuery([
+      { key: 'patient', value: client.patient.id },
+      { key: 'date', value: `ge${now.toISOString()}` }
+    ])
+
+    return client.request(`Appointment/?${query}`, {
+      flat: true
+    })
   }
 
   async function readSlots (client) {
@@ -124,16 +180,17 @@
       { key: 'start', value: `ge${min}` },
       { key: 'start', value: `lt${max}` }
     ])
-    const results = await client.request(`Slot/?${query}`)
+    const results = await client.request(`Slot/?${query}`, {
+      flat: true
+    })
 
-    return results.entry.map(result => {
-      const { resource } = result
-      const start = (new Date(resource.start)).toLocaleString()
-      const end = (new Date(resource.end)).toLocaleString()
+    return results.map(slot => {
+      const start = (new Date(slot.start)).toLocaleString()
+      const end = (new Date(slot.end)).toLocaleString()
 
       return {
         label: `${start} - ${end}`,
-        value: resource
+        value: slot
       }
     })
   }
