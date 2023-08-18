@@ -59,7 +59,7 @@
       const result = await client.request({
         url: 'Appointment',
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           status: 'booked',
           slot: [{ reference: `Slot/${resource.id}` }],
           participant: [{
@@ -69,7 +69,7 @@
             },
             status: 'accepted'
           }]
-        }
+        })
       })
 
       console.log(result)
