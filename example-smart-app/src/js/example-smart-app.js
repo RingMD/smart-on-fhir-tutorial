@@ -3,13 +3,16 @@
   const { createApp, ref } = Vue
 
   function setup () {
+    let client
     const display = ref({})
     const error = ref(null)
     const isLoading = ref(true)
     const selectedSlot = ref(null)
     const slots = ref([])
 
-    FHIR.oauth2.ready().then(async client => {
+    FHIR.oauth2.ready().then(async smartClient => {
+      client = smartClient
+
       try {
         console.log('Practitioner resource identity: ' + client.user.fhirUser)
         console.log('Patient resource identity: ' + client.getState('serverUrl') + '/Patient/' + client.patient.id)
