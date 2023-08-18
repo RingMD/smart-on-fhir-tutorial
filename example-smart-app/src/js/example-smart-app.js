@@ -61,7 +61,7 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/fhir+json'
-        }
+        },
         body: JSON.stringify({
           status: 'booked',
           slot: [{ reference: `Slot/${resource.id}` }],
