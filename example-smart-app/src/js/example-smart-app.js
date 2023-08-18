@@ -63,6 +63,7 @@
           'Content-Type': 'application/fhir+json'
         },
         body: JSON.stringify({
+          resourceType: 'Appointment',
           status: 'booked',
           slot: [{ reference: `Slot/${resource.id}` }],
           participant: [{
