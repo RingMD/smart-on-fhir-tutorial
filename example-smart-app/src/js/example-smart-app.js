@@ -156,7 +156,8 @@
     const now = new Date()
     const query = getQuery([
       { key: 'patient', value: client.patient.id },
-      { key: 'date', value: `ge${now.toISOString()}` }
+      { key: 'date', value: `ge${now.toISOString()}` },
+      { key: 'status', value: 'booked' }
     ])
 
     return client.request(`Appointment/?${query}`, {
