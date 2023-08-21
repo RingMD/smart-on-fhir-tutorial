@@ -103,7 +103,7 @@
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json-patch+json',
-            'If-Match': `W/${appointment.meta.versionId}`
+            'If-Match': `W/"${appointment.meta.versionId}"`
           },
           body: JSON.stringify([
             { op: 'replace', path: '/status', value: 'cancelled' },
