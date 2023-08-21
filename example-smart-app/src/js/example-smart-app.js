@@ -102,7 +102,8 @@
           url: `Appointment/${appointment.id}`,
           method: 'PATCH',
           headers: {
-            'Content-Type': 'application/json-patch+json'
+            'Content-Type': 'application/json-patch+json',
+            'If-Match': `W/${appointment.meta.versionId}`
           },
           body: JSON.stringify([
             { op: 'replace', path: '/status', value: 'cancelled' },
