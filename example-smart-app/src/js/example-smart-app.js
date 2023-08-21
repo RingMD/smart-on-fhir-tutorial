@@ -102,7 +102,7 @@
           url: `Appointment/${appointment.id}`,
           method: 'PATCH',
           headers: {
-            'Content-Type': 'json-patch+json'
+            'Content-Type': 'application/json-patch+json'
           },
           body: JSON.stringify([
             { op: 'replace', path: '/status', value: 'cancelled' },
