@@ -283,7 +283,7 @@
 
   function getEmail (resource) {
     // the emails are sorted by rank, so just try to get the first
-    const email = resource?.telecom?.some(tel => tel.system === 'email')
+    const email = resource?.telecom?.find(tel => tel.system === 'email')
 
     return email?.value
   }
