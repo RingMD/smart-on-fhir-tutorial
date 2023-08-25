@@ -139,6 +139,9 @@
           role: 'doctor',
           full_name: userFullName.value
         },
+        // IMPORTANT: must disable email notifications for cerner sandbox because the email addresses are dummy
+        // TODO: enable for actual clients
+        email_notifications: false,
         scheduled_at: slot.start
       })
 
