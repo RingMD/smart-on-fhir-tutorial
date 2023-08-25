@@ -12,7 +12,9 @@
     const slots = ref([])
     const appointments = ref([])
 
-    const userEmail = computed(() => getEmail(user.value) || '')
+    const userEmail = computed(() => {
+      return getEmail(user.value) || ''
+    })
     const userFullName = computed(() => {
       if (!user.value.name) {
         return ''
