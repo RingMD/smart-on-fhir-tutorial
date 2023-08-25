@@ -4,8 +4,7 @@
 
   function setup () {
     let client
-    const userEmail = ref('')
-    const userFullName = ref('')
+    const user = ref({})
     const display = ref({})
     const error = ref(null)
     const isLoading = ref(true)
@@ -13,6 +12,16 @@
     const slots = ref([])
     const appointments = ref([])
 
+    const userEmail = computed(() => getEmail(user.value) || '')
+    const userFullName = computed(() => {
+      if (!user.value.name) {
+        return ''
+      }
+
+      const { firstName, lastName } = getNames(user.value)
+
+      return [firstName, lastName].join(' ')
+    })
     const patientEmail = computed(() => display.value.email)
     const patientFullName = computed(() => [display.value.firstName, display.value.lastName].join(' '))
 
@@ -45,11 +54,7 @@
           readSlots(client)
         ])
 
-        const user = results[0]
-        const { firstName, lastName } = getNames(user.value)
-
-        userEmail.value = getEmail(user) || ''
-        userFullName.value = [firstName, lastName].join(' ')
+        user.value = results[0]
         display.value = displayPatient(client, results[1], results[2])
         appointments.value = results[3]
         slots.value = results[4]
@@ -172,6 +177,7 @@
     }
 
     return {
+      userEmail,
       userFullName,
       display,
       error,
