@@ -165,7 +165,7 @@
     }
 
     function patchAppointment (appointment, body) {
-      return await client.request({
+      return client.request({
         url: `Appointment/${appointment.id}`,
         method: 'PATCH',
         headers: {
