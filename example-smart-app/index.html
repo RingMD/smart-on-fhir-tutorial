@@ -24,8 +24,23 @@
         {{ error }}
       </div>
       <div v-else>
+        <h2>User</h2>
+        <table>
+          <tr>
+            <th>Name:</th>
+            <td>{{ userFullName }}</td>
+          </tr>
+          <tr>
+            <th>Primary email:</th>
+            <td>{{ userEmail }}</td>
+          </tr>
+        </table>
         <h2>Patient Resource</h2>
         <table>
+          <tr>
+            <th>Primary email:</th>
+            <td>{{ display.email }}</td>
+          </tr>
           <tr>
             <th>First Name:</th>
             <td>{{ display.firstName }}</td>
@@ -97,6 +112,7 @@
     -->
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
     <!-- Application-level javascript-->
     <script src='./src/js/example-smart-app.js'></script>

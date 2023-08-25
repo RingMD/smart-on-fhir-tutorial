@@ -1,15 +1,29 @@
 (function (window) {
 
-  const { createApp, ref } = Vue
+  const { createApp, computed, ref } = Vue
 
   function setup () {
     let client
+    const user = ref({})
     const display = ref({})
     const error = ref(null)
     const isLoading = ref(true)
     const selectedSlot = ref(null)
     const slots = ref([])
     const appointments = ref([])
+
+    const userEmail = computed(() => getEmail(user.value) || '')
+    const userFullName = computed(() => {
+      if (!user.value.name) {
+        return ''
+      }
+
+      const { firstName, lastName } = getNames(user.value)
+
+      return [firstName, lastName].join(' ')
+    })
+    const patientEmail = computed(() => display.value.email)
+    const patientFullName = computed(() => [display.value.firstName, display.value.lastName].join(' '))
 
     FHIR.oauth2.ready().then(async smartClient => {
       client = smartClient
@@ -30,6 +44,7 @@
                                 ].join(',') }
         ])
         const results = await Promise.all([
+          client.user.read(),
           client.patient.read(),
           client.request(`Observation?${observationQuery}`, {
             pageLimit: 0,
@@ -39,9 +54,10 @@
           readSlots(client)
         ])
 
-        display.value = displayPatient(client, results[0], results[1])
-        appointments.value = results[2]
-        slots.value = results[3]
+        user.value = results[0]
+        display.value = displayPatient(client, results[1], results[2])
+        appointments.value = results[3]
+        slots.value = results[4]
       } catch (ex) {
         error.value = ex
       } finally {
@@ -57,6 +73,10 @@
     }
 
     async function scheduleVideoVisit () {
+      if (!userEmail.value || !patientEmail.value) {
+        return window.alert('Need a primary email address for both user and patient!')
+      }
+
       const slot = selectedSlot.value
 
       if (!slot) {
@@ -66,7 +86,7 @@
       try {
         isLoading.value = true
 
-        await client.request({
+        const appointment = await client.request({
           url: 'Appointment',
           method: 'POST',
           headers: {
@@ -79,36 +99,59 @@
             participant: [{
               actor: {
                 reference: `Patient/${client.patient.id}`,
-                display: `${display.value.firstName} ${display.value.lastName}`
+                display: patientFullName.value
               },
               status: 'accepted'
             }]
           })
         })
 
+        const consultation = await createConsultation(slot)
+
+        await patchAppointment(appointment, [
+          { op: 'add', path: '/contained/0/telecom/0/value', value: consultation.receiver_join_url },
+          { op: 'add', path: '/contained/1/telecom/0/value', value: consultation.caller_join_url },
+          { op: 'add', path: '/contained/0/telecom/0/period/start', value: slot.start },
+          { op: 'add', path: '/contained/0/telecom/0/period/end', value: slot.end }
+        ])
+
         await refreshAppointments()
       } catch (ex) {
         error.value = ex
       } finally {
         isLoading.value = false
       }
+    }
+
+    async function createConsultation (slot) {
+      const apiKey = 'jJxaxr-jVzMomxsvBEAw4hXXRtRmr1N654xgsu4HToEEmaDbx1_p9izgVMBeTEm3'
+      const serverUrl = client.getState('serverUrl')
+      const response = await axios.post(`https://demo-app.ringmd.com/api/partners/v1/consultations`, {
+        caller: {
+          username: `${serverUrl}/Patient/${client.patient.id}`,
+          email: patientEmail.value,
+          role: 'patient',
+          full_name: patientFullName.value
+        },
+        receiver: {
+          username: `${serverUrl}/${client.user.fhirUser}`,
+          email: userEmail.value,
+          role: 'doctor',
+          full_name: userFullName.value
+        },
+        scheduled_at: slot.start
+      })
+
+      return response.data
     }
 
     async function cancelAppointment (appointment) {
       try {
         isLoading.value = true
 
-        await client.request({
-          url: `Appointment/${appointment.id}`,
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json-patch+json',
-            'If-Match': `W/"${appointment.meta.versionId}"`
-          },
-          body: JSON.stringify([
-            { op: 'replace', path: '/status', value: 'cancelled' }
-          ])
-        })
+        await patchAppointment(appointment, [
+          { op: 'replace', path: '/status', value: 'cancelled' }
+        ])
 
         await refreshAppointments()
       } catch (ex) {
@@ -118,7 +161,20 @@
       }
     }
 
+    function patchAppointment (appointment, body) {
+      return await client.request({
+        url: `Appointment/${appointment.id}`,
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json-patch+json',
+          'If-Match': `W/"${appointment.meta.versionId}"`
+        },
+        body: JSON.stringify(body)
+      })
+    }
+
     return {
+      userFullName,
       display,
       error,
       isLoading,
@@ -188,6 +244,7 @@
   function displayPatient (client, patient, observations) {
     const byCodes = client.byCodes(observations, 'code')
     const display = {
+      email: getEmail(patient),
       firstName: '-',
       lastName: '-',
       gender: patient.gender,
@@ -199,20 +256,33 @@
       ldl: getQuantityValueAndUnit(byCodes('2089-1')[0])
     }
 
-    const name = patient.name[0]
+    const { firstName, lastName } = getNames(patient)
 
-    if (name) {
-      display.firstName = name.given.join(' ')
-
-      // https://github.com/cerner/smart-on-fhir-tutorial/pull/213
-      if (Array.isArray(name.family)) {
-        display.lastName = name.family.join(' ')
-      } else {
-        display.lastName = name.family
-      }
-    }
+    display.firstName = firstName
+    display.lastName = lastName
 
     return display
+  }
+
+  function getNames (resource) {
+    const name = resource?.name?.[0]
+
+    if (!name) {
+      return {}
+    }
+
+    const firstName = name.given.join(' ')
+    // https://github.com/cerner/smart-on-fhir-tutorial/pull/213
+    const lastName = Array.isArray(name.family) ? name.family.join(' ') : name.family
+
+    return { firstName, lastName }
+  }
+
+  function getEmail (resource) {
+    // the emails are sorted by rank, so just try to get the first
+    const email = resource?.telecom?.some(tel => tel.system === 'email')
+
+    return email?.value
   }
 
   function getBloodPressureValue(BPObservations, typeOfPressure) {
