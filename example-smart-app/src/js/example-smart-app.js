@@ -126,7 +126,7 @@
     async function createConsultation (slot) {
       const apiKey = 'jJxaxr-jVzMomxsvBEAw4hXXRtRmr1N654xgsu4HToEEmaDbx1_p9izgVMBeTEm3'
       const serverUrl = client.getState('serverUrl')
-      const response = await axios.post(`https://demo-app.ringmd.com/api/partners/v1/consultations`, {
+      const response = await axios.post('https://demo-app.ringmd.com/api/partners/v1/consultations', {
         caller: {
           username: `${serverUrl}/Patient/${client.patient.id}`,
           email: patientEmail.value,
@@ -143,6 +143,10 @@
         // TODO: enable for actual clients
         email_notifications: false,
         scheduled_at: slot.start
+      }, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`
+        }
       })
 
       return response.data
