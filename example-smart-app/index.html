@@ -13,96 +13,98 @@
   </head>
   <body>
     <div id='app' >
-      <h2>RingMD Example-SMART-App</h2>
+      <suspense>
+        <h2>RingMD Example-SMART-App</h2>
 
-      <div v-if='isLoading' class='spinner'>
-        <div class='bounce1'></div>
-        <div class='bounce2'></div>
-        <div class='bounce3'></div>
-      </div>
-      <div v-else-if='error' style='color: red;'>
-        {{ error }}
-      </div>
-      <div v-else>
-        <h2>User</h2>
-        <table>
-          <tr>
-            <th>Name:</th>
-            <td>{{ userFullName }}</td>
-          </tr>
-          <tr>
-            <th>Primary email:</th>
-            <td>{{ userEmail }}</td>
-          </tr>
-        </table>
-        <h2>Patient Resource</h2>
-        <table>
-          <tr>
-            <th>Primary email:</th>
-            <td>{{ display.email }}</td>
-          </tr>
-          <tr>
-            <th>First Name:</th>
-            <td>{{ display.firstName }}</td>
-          </tr>
-          <tr>
-            <th>Last Name:</th>
-            <td>{{ display.lastName }}</td>
-          </tr>
-          <tr>
-            <th>Gender:</th>
-            <td>{{ display.gender }}</td>
-          </tr>
-          <tr>
-            <th>Date of Birth:</th>
-            <td>{{ display.birthDate }}</td>
-          </tr>
-        </table>
-        <h2>Observation Resource</h2>
-        <table>
-          <tr>
-            <th>Height:</th>
-            <td>{{ display.height }}</td>
-          </tr>
-          <tr>
-            <th>Systolic Blood Pressure:</th>
-            <td>{{ display.systolicbp }}</td>
-          </tr>
-          <tr>
-            <th>Diastolic Blood Pressure:</th>
-            <td>{{ display.diastolicbp }}</td>
-          </tr>
-          <tr>
-            <th>LDL:</th>
-            <td>{{ display.ldl }}</td>
-          </tr>
-          <tr>
-            <th>HDL:</th>
-            <td>{{ display.hdl }}</td>
-          </tr>
-        </table>
-        <h2>Scheduled Video Visits</h2>
-        <em v-if='!appointments.length'>None</em>
-        <table v-else>
-          <tr v-for='appointment in appointments'>
-            <td v-html='appointment.text.div'></td>
-            <td>
-              <button @click='cancelAppointment(appointment)'>Cancel</button>
-            </td>
-          </tr>
-        </table>
-        <h2>Schedule Video Visit</h2>
-        <form @submit.prevent='scheduleVideoVisit()'>
-          <label>
-            Slot
-            <select v-model='selectedSlot'>
-              <option :value='null'>-- Select --</option>
-              <option v-for='slot in slots' :value='slot.value'>{{ slot.label }}</option>
-            </select>
-          </label>
-          <button type='submit'>Submit</button>
-        </form>
-      </div>
+        <div v-if='isLoading' class='spinner'>
+          <div class='bounce1'></div>
+          <div class='bounce2'></div>
+          <div class='bounce3'></div>
+        </div>
+        <div v-else-if='error' style='color: red;'>
+          {{ error }}
+        </div>
+        <div v-else>
+          <h2>User</h2>
+          <table>
+            <tr>
+              <th>Name:</th>
+              <td>{{ userFullName }}</td>
+            </tr>
+            <tr>
+              <th>Primary email:</th>
+              <td>{{ userEmail }}</td>
+            </tr>
+          </table>
+          <h2>Patient Resource</h2>
+          <table>
+            <tr>
+              <th>Primary email:</th>
+              <td>{{ display.email }}</td>
+            </tr>
+            <tr>
+              <th>First Name:</th>
+              <td>{{ display.firstName }}</td>
+            </tr>
+            <tr>
+              <th>Last Name:</th>
+              <td>{{ display.lastName }}</td>
+            </tr>
+            <tr>
+              <th>Gender:</th>
+              <td>{{ display.gender }}</td>
+            </tr>
+            <tr>
+              <th>Date of Birth:</th>
+              <td>{{ display.birthDate }}</td>
+            </tr>
+          </table>
+          <h2>Observation Resource</h2>
+          <table>
+            <tr>
+              <th>Height:</th>
+              <td>{{ display.height }}</td>
+            </tr>
+            <tr>
+              <th>Systolic Blood Pressure:</th>
+              <td>{{ display.systolicbp }}</td>
+            </tr>
+            <tr>
+              <th>Diastolic Blood Pressure:</th>
+              <td>{{ display.diastolicbp }}</td>
+            </tr>
+            <tr>
+              <th>LDL:</th>
+              <td>{{ display.ldl }}</td>
+            </tr>
+            <tr>
+              <th>HDL:</th>
+              <td>{{ display.hdl }}</td>
+            </tr>
+          </table>
+          <h2>Scheduled Video Visits</h2>
+          <em v-if='!appointments.length'>None</em>
+          <table v-else>
+            <tr v-for='appointment in appointments'>
+              <td v-html='appointment.text.div'></td>
+              <td>
+                <button @click='cancelAppointment(appointment)'>Cancel</button>
+              </td>
+            </tr>
+          </table>
+          <h2>Schedule Video Visit</h2>
+          <form @submit.prevent='scheduleVideoVisit()'>
+            <label>
+              Slot
+              <select v-model='selectedSlot'>
+                <option :value='null'>-- Select --</option>
+                <option v-for='slot in slots' :value='slot.value'>{{ slot.label }}</option>
+              </select>
+            </label>
+            <button type='submit'>Submit</button>
+          </form>
+        </div>
+      </suspense>
     </div>
     <!-- Required JS files to enable this page to embed within an MPage -->
     <!--
