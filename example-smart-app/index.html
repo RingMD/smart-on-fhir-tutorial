@@ -88,7 +88,7 @@
             <tr v-for='appointment in appointments'>
               <td>
                 <div v-html='appointment.text.div'></div>
-                <p v-for='service in contained'>
+                <p v-for='service in appointment.contained'>
                   <strong>{{ service.type[0].text }}</strong>: <a :href='service.telecom[0].value' target='_blank'>Link</a>
                 </p>
               </td>
