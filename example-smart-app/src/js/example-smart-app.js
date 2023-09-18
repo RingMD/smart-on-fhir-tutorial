@@ -27,10 +27,8 @@
 
     onMounted(async () => {
       try {
-        const [client] = await Promise.all([
-          FHIR.oauth2.ready(),
-          ping()
-        ])
+        await ping()
+        client = await FHIR.oauth2.ready()
 
         console.log('Practitioner resource identity: ' + client.user.fhirUser)
         console.log('Patient resource identity: ' + client.getState('serverUrl') + '/Patient/' + client.patient.id)
