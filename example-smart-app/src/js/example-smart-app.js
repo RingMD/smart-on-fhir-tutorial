@@ -1,8 +1,8 @@
 (function (window) {
 
-  const { createApp, computed, ref } = Vue
+  const { createApp, computed, ref, onMounted } = Vue
 
-  async function setup () {
+  function setup () {
     let client
     const user = ref({})
     const display = ref({})
@@ -25,46 +25,48 @@
     const patientEmail = computed(() => display.value.email)
     const patientFullName = computed(() => [display.value.firstName, display.value.lastName].join(' '))
 
-    try {
-      const [client] = await Promise.all([
-        FHIR.oauth2.ready(),
-        ping()
-      ])
+    onMounted(async () => {
+      try {
+        const [client] = await Promise.all([
+          FHIR.oauth2.ready(),
+          ping()
+        ])
 
-      console.log('Practitioner resource identity: ' + client.user.fhirUser)
-      console.log('Patient resource identity: ' + client.getState('serverUrl') + '/Patient/' + client.patient.id)
+        console.log('Practitioner resource identity: ' + client.user.fhirUser)
+        console.log('Patient resource identity: ' + client.getState('serverUrl') + '/Patient/' + client.patient.id)
 
-      const observationQuery = getQuery([
-        { key: 'patient', value: client.patient.id },
-        { key: 'code', value: [
-                                'http://loinc.org|8302-2',
-                                'http://loinc.org|8462-4',
-                                'http://loinc.org|8480-6',
-                                'http://loinc.org|2085-9',
-                                'http://loinc.org|2089-1',
-                                'http://loinc.org|55284-4'
-                              ].join(',') }
-      ])
-      const results = await Promise.all([
-        client.user.read(),
-        client.patient.read(),
-        client.request(`Observation?${observationQuery}`, {
-          pageLimit: 0,
-          flat: true
-        }),
-        readAppointments(client),
-        readSlots(client)
-      ])
+        const observationQuery = getQuery([
+          { key: 'patient', value: client.patient.id },
+          { key: 'code', value: [
+                                  'http://loinc.org|8302-2',
+                                  'http://loinc.org|8462-4',
+                                  'http://loinc.org|8480-6',
+                                  'http://loinc.org|2085-9',
+                                  'http://loinc.org|2089-1',
+                                  'http://loinc.org|55284-4'
+                                ].join(',') }
+        ])
+        const results = await Promise.all([
+          client.user.read(),
+          client.patient.read(),
+          client.request(`Observation?${observationQuery}`, {
+            pageLimit: 0,
+            flat: true
+          }),
+          readAppointments(client),
+          readSlots(client)
+        ])
 
-      user.value = results[0]
-      display.value = displayPatient(client, results[1], results[2])
-      appointments.value = results[3]
-      slots.value = results[4]
-    } catch (ex) {
-      error.value = ex
-    } finally {
-      isLoading.value = false
-    }
+        user.value = results[0]
+        display.value = displayPatient(client, results[1], results[2])
+        appointments.value = results[3]
+        slots.value = results[4]
+      } catch (ex) {
+        error.value = ex
+      } finally {
+        isLoading.value = false
+      }
+    })
 
     async function ping () {
       const response = await axios.get('https://demo-app.ringmd.com/api/partners/v1/ping')
