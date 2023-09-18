@@ -133,22 +133,24 @@
       const apiKey = 'jJxaxr-jVzMomxsvBEAw4hXXRtRmr1N654xgsu4HToEEmaDbx1_p9izgVMBeTEm3'
       const serverUrl = client.getState('serverUrl')
       const response = await axios.post('https://demo-app.ringmd.com/api/partners/v1/consultations', {
-        caller: {
-          username: `${serverUrl}/Patient/${client.patient.id}`,
-          email: patientEmail.value,
-          role: 'patient',
-          full_name: patientFullName.value
-        },
-        receiver: {
-          username: `${serverUrl}/${client.user.fhirUser}`,
-          email: userEmail.value,
-          role: 'doctor',
-          full_name: userFullName.value
-        },
-        // IMPORTANT: must disable email notifications for cerner sandbox because the email addresses are dummy
-        // TODO: enable for actual clients
-        email_notifications: false,
-        scheduled_at: slot.start
+        request: {
+          caller: {
+            username: `${serverUrl}/Patient/${client.patient.id}`,
+            email: patientEmail.value,
+            role: 'patient',
+            full_name: patientFullName.value
+          },
+          receiver: {
+            username: `${serverUrl}/${client.user.fhirUser}`,
+            email: userEmail.value,
+            role: 'doctor',
+            full_name: userFullName.value
+          },
+          // IMPORTANT: must disable email notifications for cerner sandbox because the email addresses are dummy
+          // TODO: enable for actual clients
+          email_notifications: false,
+          scheduled_at: slot.start
+        }
       }, {
         headers: {
           Authorization: `Bearer ${apiKey}`
