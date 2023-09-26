@@ -67,7 +67,7 @@
     })
 
     async function ping () {
-      const response = await axios.get('https://demo-app.ringmd.com/api/partners/v1/ping')
+      const response = await axios.get('https://demo-app.ringmd.com/api/partners/v1/healthcheck')
 
       if (response.status !== 200) {
         throw new Error('Unable to ping RingMD')
